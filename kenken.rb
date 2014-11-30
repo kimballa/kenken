@@ -129,7 +129,7 @@ class Board
       print "SOLVED:\n"
       attempt.each do |row|
         row.each do |col|
-          print col.to_s + " "
+          print col.to_i.to_s + " "
         end
         print "\n"
       end

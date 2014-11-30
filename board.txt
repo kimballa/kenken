@@ -1,0 +1,29 @@
+AABBBCD
+EEFFGCD
+HHFIGCD
+HJKLLLM
+NJOPQMM
+NNOPPRR
+SSSTTUU
+
+A - 6
+B * 36
+C + 13
+D * 15
+E + 6
+F * 84
+G - 2
+H + 10
+I + 6
+J - 1
+K + 1
+L + 15
+M * 24
+N + 9
+O - 2
+P * 10
+Q + 7
+R * 6
+S + 12
+T / 3
+U + 12
