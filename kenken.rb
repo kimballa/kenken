@@ -126,6 +126,12 @@ class Board
       p @max
       p attempt
     else
+      # Do a final check for sanity's sake.
+      if !verify(attempt)
+        p attempt
+        raise RuntimeError.new("Couldn't verify the final attempt!")
+      end
+      # We're good.
       print "SOLVED:\n"
       attempt.each do |row|
         row.each do |col|
@@ -152,8 +158,8 @@ class Board
     Range.new(1, @max).each do |v|
       # print row.to_s + ", " + col.to_s + ": " + v.to_s + "\n"
       attempt[row][col] = v * 1.0
-      if col_ok(attempt, col) && row_ok(attempt, row) && domains_ok(attempt)
-        if complete(attempt)
+      if col_ok(attempt, col) && row_ok(attempt, row) && domain_ok(attempt, row, col)
+        if complete_fast(attempt)
           # We're done!
           return true # Found it.
         else
@@ -225,6 +231,38 @@ class Board
     return true # Looks ok!
   end
 
+  # Assuming the board is filled top to bottom, left to right, return true if the board
+  # is totally filled out.
+  def complete_fast(attempt)
+    return !attempt[@max - 1][@max - 1].nil?
+  end
+
+  # Return true if the constraint domain at position (r, c) is satisfied or still
+  # satisfiable.
+  def domain_ok(attempt, check_row, check_col)
+    check_domain_name = @rows[check_row][check_col]
+
+    @domains.each do |(name, dom)|
+      if name != check_domain_name
+        next
+      end
+
+      candidates = []
+      @rows.each_with_index do |row, r|
+        row.each_with_index do |d, c|
+          if d == name
+            candidates << attempt[r][c]
+          end
+        end
+      end
+      if !dom.unify(candidates)
+        # Constraint violation for this domain.
+        return false
+      end
+    end
+    return true # Checked domain is ok!
+  end
+
   # Return true if all the constraint domains are satisfied or still satisfiable.
   # Return false if a domain has a constraint violation in it.
   def domains_ok(attempt)
@@ -243,6 +281,19 @@ class Board
       end
     end
     return true # All domains ok!
+  end
+
+  # Return true if the attempt is a complete solution, false otherwise.
+  def verify(attempt)
+    # Check all the rows and columns
+    Range.new(0, @max - 1).each do |i|
+      if !col_ok(attempt, i) || !row_ok(attempt, i)
+        return false
+      end
+    end
+
+    # Check all the domains, and make sure all elements of the array are full.
+    return domains_ok(attempt) && complete(attempt)
   end
 end
 
