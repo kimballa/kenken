@@ -6,9 +6,11 @@ class Domain
     @name = name
     @op = op
     @goal = goal.to_i
+    @positions = nil
   end
 
   attr_accessor :name
+  attr_accessor :positions
 
   # Given a collection of candidate values, return true if they can be unified
   # by the given operation to produce the goal value, false otherwise.
@@ -268,14 +270,28 @@ class Board
         next
       end
 
-      candidates = []
-      @rows.each_with_index do |row, r|
-        row.each_with_index do |d, c|
-          if d == name
-            candidates << attempt[r][c]
+      if dom.positions.nil?
+        # Calculate all the candidate values the slow way, by searching the whole board.
+        # Along the way, memoize the positions of the board where this domain is present.
+        candidates = []
+        positions = []
+        @rows.each_with_index do |row, r|
+          row.each_with_index do |d, c|
+            if d == name
+              candidates << attempt[r][c]
+              positions << [r, c]
+            end
           end
         end
+
+        dom.positions = positions # Save this for next time.
+      else
+        candidates = []
+        dom.positions.each do |(r, c)|
+          candidates << attempt[r][c]
+        end
       end
+
       if !dom.unify(candidates)
         # Constraint violation for this domain.
         return false
@@ -289,12 +305,8 @@ class Board
   def domains_ok(attempt)
     @domains.each do |(name, dom)|
       candidates = []
-      @rows.each_with_index do |row, r|
-        row.each_with_index do |d, c|
-          if d == name
-            candidates << attempt[r][c]
-          end
-        end
+      dom.positions.each do |(r, c)|
+        candidates << attempt[r][c]
       end
       if !dom.unify(candidates)
         # Constraint violation for this domain.
