@@ -17,15 +17,36 @@ class Domain
   # the values [4, 2] or [1, 5] would unify, as would [2, 4] and [5, 1].
   def unify(candidates)
     # print "Check dom " + @name + " (" + @op + ") = " + @goal.to_s + ": " + candidates.to_s + "\n"
-    if @op == '+' || @op == '-'
+    if @op == '+'
+      unify_aux_commutative(0, candidates)
+    elsif @op == '-'
       unify_aux(0, candidates)
-    else # *, /
+    elsif @op == '*'
+      unify_aux_commutative(1, candidates)
+    elsif @op == '/'
       unify_aux(1, candidates)
     end
   end
 
   protected
 
+  # Unify constraints, assuming they are commutative operations.
+  def unify_aux_commutative(accumulator, candidates)
+    candidates.each do |candidate|
+      if candidate.nil?
+        # We haven't filled out the entire domain yet.
+        return true # Implying that so far, we are okay to continue.
+      elsif @op == '+'
+        accumulator += candidate
+      elsif @op == '*'
+        accumulator *= candidate
+      end
+    end
+
+    return accumulator == @goal
+  end
+
+  # Unify constraints, checking all legal orderings of non-commutative operations.
   def unify_aux(accumulator, candidates)
     if candidates == [] || candidates.nil?
       return accumulator == @goal
