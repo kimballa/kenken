@@ -249,39 +249,30 @@ class Board
   def domain_ok(attempt, check_row, check_col)
     check_domain_name = @rows[check_row][check_col]
 
-    @domains.each do |(name, dom)|
-      if name != check_domain_name
-        next
-      end
-
-      if dom.positions.nil?
-        # Calculate all the candidate values the slow way, by searching the whole board.
-        # Along the way, memoize the positions of the board where this domain is present.
-        candidates = []
-        positions = []
-        @rows.each_with_index do |row, r|
-          row.each_with_index do |d, c|
-            if d == name
-              candidates << attempt[r][c]
-              positions << [r, c]
-            end
+    dom = @domains[check_domain_name]
+    if dom.positions.nil?
+      # Calculate all the candidate values the slow way, by searching the whole board.
+      # Along the way, memoize the positions of the board where this domain is present.
+      candidates = []
+      positions = []
+      @rows.each_with_index do |row, r|
+        row.each_with_index do |d, c|
+          if d == check_domain_name
+            candidates << attempt[r][c]
+            positions << [r, c]
           end
         end
-
-        dom.positions = positions # Save this for next time.
-      else
-        candidates = []
-        dom.positions.each do |(r, c)|
-          candidates << attempt[r][c]
-        end
       end
 
-      if !dom.unify(candidates)
-        # Constraint violation for this domain.
-        return false
+      dom.positions = positions # Save this for next time.
+    else
+      candidates = []
+      dom.positions.each do |(r, c)|
+        candidates << attempt[r][c]
       end
     end
-    return true # Checked domain is ok!
+
+    return dom.unify(candidates)
   end
 
   # Return true if all the constraint domains are satisfied or still satisfiable.
