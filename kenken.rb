@@ -18,7 +18,6 @@ class Domain
   # e.g., for a set of two items with a goal value of 6 and an operation of '+',
   # the values [4, 2] or [1, 5] would unify, as would [2, 4] and [5, 1].
   def unify(candidates)
-    # print "Check dom " + @name + " (" + @op + ") = " + @goal.to_s + ": " + candidates.to_s + "\n"
     if @op == '+'
       unify_aux_commutative(0, candidates)
     elsif @op == '-'
@@ -168,18 +167,12 @@ class Board
   protected
 
   def guess_and_check(attempt, row, col)
-    if col < 0
-      raise RuntimeError.new("Negative column?!")
-    elsif col >= @max
+    if col >= @max
       # Time to move to the next row
       return guess_and_check(attempt, row + 1, 0)
-    elsif row >= @max
-      # We are finished with the board
-      raise RuntimeError.new("Finished with the board / overflow?")
     end
 
     Range.new(1, @max).each do |v|
-      # print row.to_s + ", " + col.to_s + ": " + v.to_s + "\n"
       attempt[row][col] = v * 1.0
       if col_ok(attempt, col) && row_ok(attempt, row) && domain_ok(attempt, row, col)
         if complete_fast(attempt)
@@ -209,13 +202,11 @@ class Board
       if v.nil?
         next
       elsif found[v]
-        #print "Found value twice in row: " + v.to_s + "\n"
         return false # Found a value twice.
       end
 
       found[v] = true
     end
-    #print "Row ok\n"
     return true
   end
 
@@ -223,22 +214,17 @@ class Board
   def col_ok(attempt, col)
     found = [false] * @max
     attempt_col = []
-    #print "Checking column " + col.to_s + "\n"
     attempt.each do |row|
-      #p row
       attempt_col << row[col]
     end
-    #p attempt_col
     attempt_col.each do |v|
       if v.nil?
         next
       elsif found[v]
-        #print "Found value twice in col: " + v.to_s + "\n"
         return false # Found a value twice.
       end
       found[v] = true
     end
-    #print "col ok\n"
     return true
   end
 
