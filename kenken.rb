@@ -41,6 +41,10 @@ class Domain
       elsif @op == '*'
         accumulator *= candidate
       end
+
+      if accumulator > @goal
+        return false # Early return if we exceed the goal threshold.
+      end
     end
 
     return accumulator == @goal
@@ -58,12 +62,8 @@ class Domain
         return true # Implying that so far, we are okay to continue.
       elsif @op == '-'
         next_val = candidate - accumulator
-      elsif @op == '+'
-        next_val = candidate + accumulator
       elsif @op == '/'
         next_val = candidate / accumulator
-      elsif @op == '*'
-        next_val = candidate * accumulator
       end
 
       next_candidates = candidates.dup
