@@ -196,34 +196,32 @@ class Board
 
   # Return true if the specified row contains no duplicate values.
   def row_ok(attempt, row)
-    found = [false] * @max
+    found = 0
     attempt_row = attempt[row]
     attempt_row.each do |v|
       if v.nil?
         next
-      elsif found[v]
+      elsif (found & (1 << v.to_i)) != 0
         return false # Found a value twice.
       end
 
-      found[v] = true
+      found |= (1 << v.to_i)
     end
     return true
   end
 
   # Return true if the specified column contains no duplicate values.
   def col_ok(attempt, col)
-    found = [false] * @max
-    attempt_col = []
+    found = 0
     attempt.each do |row|
-      attempt_col << row[col]
-    end
-    attempt_col.each do |v|
+      v = row[col]
       if v.nil?
         next
-      elsif found[v]
+      elsif (found & (1 << v.to_i)) != 0
         return false # Found a value twice.
       end
-      found[v] = true
+
+      found |= (1 << v.to_i)
     end
     return true
   end
